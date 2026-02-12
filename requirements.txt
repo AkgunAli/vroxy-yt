@@ -16,6 +16,6 @@ requests-file==1.5.1
 six==1.16.0
 tldextract==3.3.1
 urllib3>=1.26.17,<3
-websockets==10.3
+websockets>=12.0              # ← SABİT 10.3 KALDIRILDI, yt-dlp ile uyumlu aralık
 yarl==1.7.2
 yt-dlp==2024.7.9
