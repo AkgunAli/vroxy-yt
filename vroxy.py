@@ -132,7 +132,10 @@ async def resolveUrl(query: dict) -> str:
         for purge_id in purge:
             del cache_map[purge_id]
 
-    ytdl_opts = {"quiet": True}
+    ytdl_opts = {
+    "quiet": True,
+    "cookiefile": "/app/cookies.txt"
+    }
 
     url = query.get("url") or query.get("u")
     if not url:
