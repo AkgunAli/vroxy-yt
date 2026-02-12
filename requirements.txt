@@ -51,7 +51,7 @@ six==1.16.0
     # via requests-file
 tldextract==3.3.1
     # via -r requirements.in
-urllib3==1.26.12
+urllib3>=1.26.17,<2.0.0
     # via requests
 websockets==10.3
     # via yt-dlp
