@@ -3,6 +3,9 @@ import os
 import logging as log
 from aiohttp import web
 from configparser import ConfigParser
+from typing import List
+import hmac
+from aiohttp.web import middleware, Response
 
 # ── ConfigParser ile config nesnesini direkt burada oluştur ──
 config = ConfigParser()
@@ -18,9 +21,31 @@ settings_file = os.path.join(os.getcwd(), "settings.ini")
 if os.path.isfile(settings_file):
     config.read(settings_file)
 
-# Artık app.config import'u yok – config doğrudan burada
+# ── Middleware fonksiyonunu direkt burada tanımla ──
+def makeTokenAuthzMiddleware(tokens: List[str]):
+    """Authorizes requests based on a static list of bearer tokens"""
 
-from app.middleware import makeTokenAuthzMiddleware
+    @middleware
+    async def _tokenAuthzMiddleware(request, handler):
+        auth_token = ""
+        # Authorization: Bearer <token>
+        if auth_header := request.headers.get("Authorization"):
+            header_parts: List[str] = auth_header.split(None, 1)
+            if len(header_parts) == 2 and header_parts[0].lower() == "bearer":
+                auth_token = header_parts[1]
+        # Query param ile token kabul et (antipattern ama kabul edilebilir risk)
+        if auth_query := request.query.get("token"):
+            auth_token = auth_query
+        for t in tokens:
+            # compare_digest ile timing attack önleme
+            if hmac.compare_digest(t, auth_token):
+                return await handler(request)
+
+        return Response(status=401, text="Missing authorization token")
+
+    return _tokenAuthzMiddleware
+
+# Diğer import'lar (app/resolver ve app/exceptions hâlâ var, onları da taşımak istersen söyle)
 from app.resolver import resolveUrl
 from app.exceptions import *
 
