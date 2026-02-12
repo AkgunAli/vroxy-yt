@@ -1,12 +1,7 @@
 FROM python:3.10.6-slim
 
-# Render'da standart /app dizini kullan
+# Render'ın sevdiği standart dizin
 WORKDIR /app
-
-# Sistem bağımlılıkları (gerekli değil ama güvenli)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
 
 # Pip güncelle
 RUN pip install --upgrade pip setuptools wheel
@@ -15,14 +10,14 @@ RUN pip install --upgrade pip setuptools wheel
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Tüm dosyaları kopyala
+# Tüm dosyaları kopyala (app/ dahil)
 COPY . .
 
-# PYTHONPATH'i /app yap (app klasörü burada)
+# PYTHONPATH ekle (app modülü için)
 ENV PYTHONPATH=/app
 
-# Port belirt (Render otomatik algılasın)
+# Port belirt
 EXPOSE 8008
 
-# Start komutu (göreceli yol – WORKDIR'e göre)
+# Komut (göreceli yol – WORKDIR'e göre)
 CMD ["python", "-u", "vroxy.py"]
